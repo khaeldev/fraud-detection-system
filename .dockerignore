@@ -1,0 +1,30 @@
+# Ignorar carpetas de entornos virtuales locales
+venv/
+.venv/
+env/
+.env
+
+# Ignorar historial de git (suele pesar muchísimo)
+.git/
+.gitignore
+
+# Ignorar caché de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar archivos de sistema y IDEs
+.DS_Store
+.vscode/
+.idea/
+
+# Ignorar documentación y archivos pesados no necesarios en prod
+README.md
+docs/
+tests/
+infra/
+
+# Ignorar notebooks de Jupyter si los tienes
+*.ipynb
+.ipynb_checkpoints

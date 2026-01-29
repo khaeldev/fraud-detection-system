@@ -1,0 +1,61 @@
+name: Build & Deploy (Full Stack)
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  TF_WORKING_DIR: './infra'
+
+jobs:
+  deploy-process:
+    name: "Infra -> Build -> Deploy"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Apply (ECR Only)
+        run: terraform apply -auto-approve -target=aws_ecr_repository.repo
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          # Obtenemos el nombre del repo desde Terraform output o hardcoded
+          REPO_NAME="fraude-bcp-repo"
+          
+          echo "Construyendo imagen..."
+          docker build -t $ECR_REGISTRY/$REPO_NAME:latest .
+          
+          echo "Subiendo imagen..."
+          docker push $ECR_REGISTRY/$REPO_NAME:latest
+
+      - name: Terraform Apply (Full Infra)
+        run: terraform apply -auto-approve
+        working-directory: ${{ env.TF_WORKING_DIR }}
