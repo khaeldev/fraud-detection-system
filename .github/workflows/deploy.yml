@@ -47,8 +47,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          # Obtenemos el nombre del repo desde Terraform output o hardcoded
-          REPO_NAME="fraude-bcp-repo"
+          REPO_NAME=${{ env.TF_WORKING_DIR }}
           
           echo "Construyendo imagen..."
           docker build -t $ECR_REGISTRY/$REPO_NAME:latest .
