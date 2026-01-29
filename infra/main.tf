@@ -3,7 +3,7 @@ terraform {
     aws = { source = "hashicorp/aws", version = "~> 5.0" }
   }
   backend "s3" {
-    bucket = "fraude-bcp-terraform-state-khael" # <--- TU BUCKET S3 AQUÍ
+    bucket = "buckets3-fraud-detection-system"
     key    = "prod/terraform.tfstate"
     region = "us-east-1"
   }
@@ -13,7 +13,7 @@ provider "aws" { region = "us-east-1" }
 
 # 1. Repositorio ECR 
 resource "aws_ecr_repository" "repo" {
-  name         = "fraude-bcp-repo"
+  name         = "fraud-detection-system"
   force_delete = true
 }
 
@@ -34,7 +34,7 @@ resource "aws_iam_role_policy_attachment" "attach" {
 
 # 3. App Runner
 resource "aws_apprunner_service" "app" {
-  service_name = "fraude-detector-api"
+  service_name = "fraud-detection-system-service"
 
   source_configuration {
     authentication_configuration { access_role_arn = aws_iam_role.app_runner_role.arn }
