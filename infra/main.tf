@@ -11,6 +11,23 @@ terraform {
 
 provider "aws" { region = "us-east-1" }
 
+variable "openai_api_key" {
+  type      = string
+  sensitive = true
+}
+variable "langsmith_project" {
+  type      = string
+  sensitive = true
+}
+variable "langsmith_api_key" {
+  type      = string
+  sensitive = true
+}
+variable "langchain_tracing_v2" {
+  type      = string
+  sensitive = true
+}
+
 # 1. Repositorio ECR 
 resource "aws_ecr_repository" "repo" {
   name         = "fraud-detection-system"
@@ -48,6 +65,10 @@ resource "aws_apprunner_service" "app" {
         port = "8000"
         runtime_environment_variables = {
           ENVIRONMENT = "production"
+          OPENAI_API_KEY    = var.openai_api_key
+          LANGSMITH_PROJECT    = var.langsmith_project
+          LANGSMITH_API_KEY    = var.langsmith_api_key
+          LANGCHAIN_TRACING_V2 = var.langchain_tracing_v2
         }
       }
     }

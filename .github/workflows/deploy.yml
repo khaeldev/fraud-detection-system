@@ -39,6 +39,11 @@ jobs:
       - name: Terraform Apply (ECR Only)
         run: terraform apply -auto-approve -target=aws_ecr_repository.repo
         working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_langsmith_api_key: ${{ secrets.LANGSMITH_API_KEY }}
+          TF_VAR_langsmith_project: ${{ secrets.LANGSMITH_PROJECT }}
+          TF_VAR_langchain_tracing_v2: ${{ secrets.LANGCHAIN_TRACING_V2 }}
 
       - name: Login to Amazon ECR
         id: login-ecr
