@@ -51,7 +51,7 @@ resource "aws_iam_role_policy_attachment" "attach" {
 
 # 3. App Runner
 resource "aws_apprunner_service" "app" {
-  service_name = "fraud-detection-system-service"
+  service_name = "fraud-detection-system-service-v1"
 
   source_configuration {
     authentication_configuration { access_role_arn = aws_iam_role.app_runner_role.arn }
