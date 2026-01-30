@@ -281,21 +281,16 @@ terraform destroy
 
 ---
 
+## Frontend
+
+https://frauddetectionapp1.streamlit.app/
+
 ## 🧠 Decisiones de Diseño
 
 * **LangGraph vs Chains** → Control de flujo explícito y escalable
 * **FAISS Local** → Menor latencia y costos
 * **Debate Adversarial** → Reducción de sesgos del LLM
 * **Fallback Mock** → Continuidad operativa garantizada
-
----
-
-## 🛣 Roadmap
-
-* [ ] Integración con Kinesis / Kafka
-* [ ] Almacenamiento de casos en DynamoDB / PostgreSQL
-* [ ] Scoring cuantitativo + explicabilidad SHAP‑like
-* [ ] Autorización OAuth2 / RBAC
 
 ---
 

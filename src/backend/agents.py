@@ -127,7 +127,13 @@ def transaction_context_agent(state: AgentState):
     return {"internal_signals": signals}
 
 def behavioral_pattern_agent(state: AgentState):
-    sys = "Eres un Analista de Fraude. Detecta anomalías en monto, hora y dispositivo."
+    sys = """Eres un Analista de Fraude. Detecta anomalías en monto, hora y dispositivo.
+    Reglas de Análisis:
+    1. Si el monto es MUCHO MAYOR al promedio -> RIESGO ALTO.
+    2. Si el monto es MENOR al promedio -> RIESGO BAJO (es normal gastar poco).
+    3. Si el dispositivo es nuevo pero el monto es bajo -> RIESGO BAJO.
+    4. Sé breve.
+    """
     usr = f"Tx: {state['transaction']}. Perfil: {state['customer_profile']}. ¿Es anómalo?"
     mock = "Monto muy superior al promedio y dispositivo nuevo. Riesgo Alto."
     
@@ -162,18 +168,28 @@ def evidence_aggregator_agent(state: AgentState):
     return {}
 
 def debate_agent(state: AgentState):
-    sys = "Genera un debate corto entre un agente Pro-Fraude y uno Pro-Cliente."
+    sys = """Genera un debate corto entre un agente Pro-Fraude y uno Pro-Cliente.
+    REGLA CLAVE:
+    Si 'Intel Externa' dice "Whitelisted", "Seguro" o "Safe":
+    - El Agente Pro-Fraude DEBE admitir que es seguro.
+    - El Agente Pro-Cliente DEBE pedir aprobación inmediata.
+    """
     usr = f"Datos: {state['transaction']}, Análisis: {state['behavior_analysis']}, Intel: {state['external_intel']}"
     mock = "Pro-Fraude: Riesgo alto por intel externa. Pro-Cliente: Es un cliente VIP. Conclusión: Verificar."
     
     return {"debate_transcript": invoke_agent(sys, usr, mock)}
 
 def decision_arbiter_agent(state: AgentState):
-    sys = """Decide: APPROVE, CHALLENGE, BLOCK, ESCALATE_TO_HUMAN.
-    REGLAS DE ORO:
-    1. Si la Intel Externa dice "BLOQUEO OBLIGATORIO" o "Lista Negra" -> TU DECISIÓN DEBE SER "BLOCK".
-    2. Si el comportamiento es normal y el comercio es seguro -> TU DECISIÓN DEBE SER "APPROVE".
-    3. Para dudas -> "CHALLENGE" o "ESCALATE_TO_HUMAN".
+    sys = """Eres el Juez de Riesgos.
+    Tu decisión debe basarse en la evidencia más fuerte.
+    Decide: APPROVE, CHALLENGE, BLOCK, ESCALATE_TO_HUMAN.    
+    JERARQUÍA DE EVIDENCIA (De mayor a menor peso):
+    1. [CRÍTICO] Intel Externa "Blacklisted" -> BLOCK.
+    2. [FUERTE] Intel Externa "Whitelisted" + Dispositivo Conocido -> APPROVE.
+    3. [MEDIO] Monto inusual o Dispositivo Nuevo -> CHALLENGE.
+    
+    Si todo parece normal (Monto bajo, Dispositivo conocido, Intel Neutra/Positiva) -> APPROVE.
+    Para dudas -> "CHALLENGE" o "ESCALATE_TO_HUMAN".
     Responde SOLO JSON: {"decision": "str", "confidence": float, "reason": "str"}"""
     usr = f"Debate: {state['debate_transcript']}"
     mock = {"decision": "CHALLENGE", "confidence": 0.9, "reason": "Intel de fraude confirmada."}

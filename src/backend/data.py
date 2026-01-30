@@ -16,7 +16,7 @@ FRAUD_POLICIES = [
 TRANSACTIONS = [
     {"transaction_id": "T-1001", "customer_id": "CU-001", "amount": 1800.00, "currency": "PEN", "country": "PE", "channel": "web", "device_id": "D-01", "timestamp": "2025-12-17T03:15:00", "merchant_id": "M-001"},
     {"transaction_id": "T-1002", "customer_id": "CU-002", "amount": 9500.00, "currency": "PEN", "country": "PE", "channel": "mobile", "device_id": "D-02", "timestamp": "2025-12-17T23:45:00", "merchant_id": "M-002"},
-    {"transaction_id": "T-LEGIT-001", "customer_id": "CU-001", "amount": 45.50, "currency": "PEN", "country": "PE", "channel": "web", "device_id": "D-01", "timestamp": "2025-12-18T10:15:00", "merchant_id": "M-SAFE"},
+    {"transaction_id": "T-LEGIT-001", "customer_id": "CU-001", "amount": 300.50, "currency": "PEN", "country": "PE", "channel": "web", "device_id": "D-01", "timestamp": "2025-12-18T10:15:00", "merchant_id": "M-SAFE"},
     {"transaction_id": "T-FRAUD-999", "customer_id": "CU-001", "amount": 500000.00, "currency": "PEN", "country": "RU", "channel": "web", "device_id": "D-HACKER", "timestamp": "2025-12-18T03:00:00", "merchant_id": "M-DANGER"}
 ]
 
