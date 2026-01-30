@@ -188,6 +188,8 @@ jobs:
           exit 1
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
+          TF_VAR_embedding_provider: ${{ secrets.EMBEDDING_PROVIDER }}
+          TF_VAR_llm_provider: ${{ secrets.LLM_PROVIDER }}
           TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           TF_VAR_langsmith_api_key: ${{ secrets.LANGSMITH_API_KEY }}
           TF_VAR_langsmith_project: ${{ secrets.LANGSMITH_PROJECT }}
