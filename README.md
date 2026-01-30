@@ -179,7 +179,7 @@ El sistema consta de **Backend (API)** y **Frontend (Dashboard)**.
 ### 1. Backend – FastAPI
 
 ```bash
-uv run uvicorn src.backend.app:app --reload --port 8000
+uv run uvicorn src.backend.app:app --reload --port 8000 --log-config src/backend/logging.yaml
 ```
 
 * Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
@@ -293,6 +293,95 @@ https://frauddetectionapp1.streamlit.app/
 * **Fallback Mock** → Continuidad operativa garantizada
 
 ---
+
+---
+
+TEST CASES:
+- APPROVE: T-LEGIT-001
+
+```json
+{
+   "decision":"APPROVE",
+   "confidence":0.95,
+   "signals":{
+      "high_amount":false,
+      "odd_hours":false,
+      "new_device":true
+   },
+   "citations_internal":[
+      "FP-01: Si el monto de la transacción supera 3 veces el promedio histórico del cliente y se realiza fuera de su horario habitual, se debe emitir un CHALLENGE.",
+      "FP-02: Cualquier transacción realizada desde un país diferente al habitual y usando un dispositivo no registrado previamente debe ser escalada inmediatamente a revisión humana (ESCALATE_TO_HUMAN)."
+   ],
+   "citations_external":"Comercio verificado y seguro (Whitelisted).",
+   "explanation_customer":"Su transacción ha sido aprobada porque proviene de un comercio verificado, lo que significa que es un lugar confiable para realizar compras. Además, nuestro análisis ha determinado que el riesgo asociado a esta transacción es bajo, lo que nos permite proceder con confianza.",
+   "explanation_audit":"La decisión de aprobar la transacción se basa en un alto nivel de confianza (0.95) y en el hecho de que el comercio está en nuestra lista blanca. El análisis de riesgo ha indicado que no hay preocupaciones significativas, lo que justifica la aprobación."
+}
+```
+
+- FRAUD: T-FRAUD-999
+
+```json
+{
+   "decision":"BLOCK",
+   "confidence":1.0,
+   "signals":{
+      "high_amount":true,
+      "odd_hours":true,
+      "new_device":true
+   },
+   "citations_internal":[
+      "FP-01: Si el monto de la transacción supera 3 veces el promedio histórico del cliente y se realiza fuera de su horario habitual, se debe emitir un CHALLENGE.",
+      "FP-02: Cualquier transacción realizada desde un país diferente al habitual y usando un dispositivo no registrado previamente debe ser escalada inmediatamente a revisión humana (ESCALATE_TO_HUMAN)."
+   ],
+   "citations_external":"ALERTA CRÍTICA (NIVEL ROJO): Este comercio está en la lista negra global de lavado de activos. BLOQUEO OBLIGATORIO.",
+   "explanation_customer":"Su transacción ha sido bloqueada porque está relacionada con un comercio que se encuentra en la lista negra global de lavado de activos. Esto significa que hay un riesgo significativo asociado, y es nuestra responsabilidad proteger su seguridad financiera.",
+   "explanation_audit":"La decisión de bloquear la transacción se basa en un riesgo crítico identificado, ya que el comercio involucrado está en la lista negra global de lavado de activos. La confianza en esta decisión es del 100%, lo que justifica la acción preventiva para mitigar riesgos legales y financieros."
+}
+```
+
+- CUSTOM: T-1002
+
+```json
+{
+   "decision":"CHALLENGE",
+   "confidence":0.7,
+   "signals":{
+      "high_amount":true,
+      "odd_hours":false,
+      "new_device":true
+   },
+   "citations_internal":[
+      "FP-01: Si el monto de la transacción supera 3 veces el promedio histórico del cliente y se realiza fuera de su horario habitual, se debe emitir un CHALLENGE.",
+      "FP-02: Cualquier transacción realizada desde un país diferente al habitual y usando un dispositivo no registrado previamente debe ser escalada inmediatamente a revisión humana (ESCALATE_TO_HUMAN)."
+   ],
+   "citations_external":"ALERTA: Reportes de fraude recientes en este comercio.",
+   "explanation_customer":"Hemos decidido desafiar la transacción debido a que el monto es inusual y hemos recibido reportes recientes de fraude. Esto significa que necesitamos realizar una revisión más detallada antes de poder confirmar la validez de la transacción.",
+   "explanation_audit":"La decisión de desafiar la transacción se basa en un nivel de confianza del 70%, lo que indica que hay razones suficientes para sospechar de la legitimidad de la operación. La inusualidad del monto y los reportes de fraude recientes justifican una auditoría más exhaustiva para mitigar riesgos."
+}
+```
+
+- ESCALATE_TO_HUMAN: T-HUMAN-999
+
+```json
+{
+   "decision":"ESCALATE_TO_HUMAN",
+   "confidence":0.5,
+   "signals":{
+      "high_amount":false,
+      "odd_hours":false,
+      "new_device":true
+   },
+   "citations_internal":[
+      "FP-01: Si el monto de la transacción supera 3 veces el promedio histórico del cliente y se realiza fuera de su horario habitual, se debe emitir un CHALLENGE.",
+      "FP-02: Cualquier transacción realizada desde un país diferente al habitual y usando un dispositivo no registrado previamente debe ser escalada inmediatamente a revisión humana (ESCALATE_TO_HUMAN)."
+   ],
+   "citations_external":"Sin reportes negativos.",
+   "explanation_customer":"Su transacción ha sido escalada para revisión humana debido a que se realizó en un país diferente y el monto es alto. Esto se hace para garantizar la seguridad de su cuenta y prevenir posibles fraudes.",
+   "explanation_audit":"La decisión de escalar la transacción a un humano se basa en un nivel de confianza del 50%, considerando el riesgo potencial asociado a transacciones internacionales de alto monto, conforme a las políticas de prevención de fraude."
+}
+```
+
+
 
 ## 📄 Licencia
 

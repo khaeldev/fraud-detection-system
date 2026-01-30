@@ -185,13 +185,21 @@ def decision_arbiter_agent(state: AgentState):
     Decide: APPROVE, CHALLENGE, BLOCK, ESCALATE_TO_HUMAN.    
     JERARQUÍA DE EVIDENCIA (De mayor a menor peso):
     1. [CRÍTICO] Intel Externa "Blacklisted" -> BLOCK.
-    2. [FUERTE] Intel Externa "Whitelisted" + Dispositivo Conocido -> APPROVE.
-    3. [MEDIO] Monto inusual o Dispositivo Nuevo -> CHALLENGE.
+    
+    2. [COMPLEJO / HUMAN / policy_context] -> ESCALATE_TO_HUMAN:
+        - Si hay Cambio de PAÍS y el Monto es ALTO (Posible viaje o robo de tarjeta).
+        - Si la confianza de tu decisión es baja (< 0.6).
+        -si políticas RAG(policy_context) sugieren revisión humana(CRITICO)
+        
+    3. [FUERTE] Intel Externa "Whitelisted" + Dispositivo Conocido -> APPROVE.
+    
+    4. [MEDIO] Monto inusual o Dispositivo Nuevo -> CHALLENGE.
     
     Si todo parece normal (Monto bajo, Dispositivo conocido, Intel Neutra/Positiva) -> APPROVE.
-    Para dudas -> "CHALLENGE" o "ESCALATE_TO_HUMAN".
+    Para dudas -> "CHALLENGE"
     Responde SOLO JSON: {"decision": "str", "confidence": float, "reason": "str"}"""
-    usr = f"Debate: {state['debate_transcript']}"
+    usr = f"Debate: {state['debate_transcript']}, PolicyContext: {state['policy_context']}"
+    logger.info(f"🧮 Decision Arbiter Input: {usr}")
     mock = {"decision": "CHALLENGE", "confidence": 0.9, "reason": "Intel de fraude confirmada."}
     
     return {"final_decision": invoke_agent(sys, usr, mock, force_json=True)}

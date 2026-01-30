@@ -64,6 +64,19 @@ async def analyze_transaction(tx: TransactionRequest):
         "explanations": result["explanation"]
     }
     
+
+    custom_response = {
+        "decision": result["final_decision"].get("decision", "MANUAL_REVIEW"),
+        "confidence": result["final_decision"].get("confidence", 0.0),
+        "signals": result["internal_signals"],
+        "citations_internal": result["policy_context"],
+        "citations_external": result["external_intel"],
+        "explanation_customer": result["explanation"].get("explanation_customer", ""),
+        "explanation_audit": result["explanation"].get("explanation_audit", "")
+    }
+    logger.info(f"✅ Análisis completado custom_response: {custom_response}")
+
+    logger.info(f"✅ Análisis completado: {response}")
     return response
 
 @app.get("/test-data")
