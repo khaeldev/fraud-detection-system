@@ -8,8 +8,10 @@ import time
 import numpy as np
 from typing import List
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 # ==========================================
 # 🎛️ SELECTOR DE PROVEEDOR (SWITCH)
@@ -40,12 +42,12 @@ def get_embedding_model():
     try:
         if EMBEDDING_PROVIDER == "openai":
             from langchain_openai import OpenAIEmbeddings
-            print("🔵 Usando OpenAI Embeddings (text-embedding-3-small)...")
+            logger.info("🔵 Usando OpenAI Embeddings (text-embedding-3-small)...")
             return OpenAIEmbeddings(model="text-embedding-3-small")
         
         elif EMBEDDING_PROVIDER == "azure":
             from langchain_openai import AzureOpenAIEmbeddings
-            print("☁️ Usando Azure OpenAI Embeddings...")
+            logger.info("☁️ Usando Azure OpenAI Embeddings...")
             return AzureOpenAIEmbeddings(
                 azure_deployment=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
                 model="text-embedding-3-small"
@@ -56,7 +58,7 @@ def get_embedding_model():
             import boto3
             from botocore.config import Config
             
-            print("🟠 Usando AWS Bedrock (Titan V2)...")
+            logger.info("🟠 Usando AWS Bedrock (Titan V2)...")
             retry_config = Config(
                 region_name=os.getenv("AWS_DEFAULT_REGION", "us-east-1"),
                 retries={"max_attempts": 5, "mode": "adaptive"}
@@ -73,12 +75,12 @@ def get_embedding_model():
             )
             
         else:
-            print("⚠️ Modo Mock seleccionado manualmente.")
+            logger.info("⚠️ Modo Mock seleccionado manualmente.")
             return MockEmbeddings()
 
     except Exception as e:
-        print(f"❌ Error inicializando {EMBEDDING_PROVIDER}: {e}")
-        print("⚠️ Fallback automático a MOCK.")
+        logger.info(f"❌ Error inicializando {EMBEDDING_PROVIDER}: {e}")
+        logger.info("⚠️ Fallback automático a MOCK.")
         return MockEmbeddings()
 
 # ==========================================
@@ -94,21 +96,21 @@ class RAGEngine:
 
         # 2. Intentar cargar desde disco (Caché)
         if os.path.exists(FAISS_PATH):
-            print(f"📦 Cargando índice existente desde: {FAISS_PATH}...")
+            logger.info(f"📦 Cargando índice existente desde: {FAISS_PATH}...")
             try:
                 self.vector_store = FAISS.load_local(
                     FAISS_PATH,
                     embeddings=self.embeddings,
                     allow_dangerous_deserialization=True
                 )
-                print("✅ Índice cargado correctamente.")
+                logger.info("✅ Índice cargado correctamente.")
             except Exception as e:
-                print(f"⚠️ Error cargando disco (quizás cambió el proveedor): {e}")
-                print("🔄 Se regenerará el índice.")
+                logger.info(f"⚠️ Error cargando disco (quizás cambió el proveedor): {e}")
+                logger.info("🔄 Se regenerará el índice.")
 
         # 3. Si no existe o falló la carga, generamos de cero
         if not self.vector_store:
-            print(f"🚀 Generando embeddings nuevos con {EMBEDDING_PROVIDER}...")
+            logger.info(f"🚀 Generando embeddings nuevos con {EMBEDDING_PROVIDER}...")
             self._build_index()
 
         # 4. Configurar el retriever
@@ -133,7 +135,7 @@ class RAGEngine:
             
             for i in range(0, total, BATCH_SIZE):
                 batch = texts[i:i + BATCH_SIZE]
-                print(f"   Processing batch {i} to {min(i+BATCH_SIZE, total)}...")
+                logger.info(f"   Processing batch {i} to {min(i+BATCH_SIZE, total)}...")
                 
                 vectors = self.embeddings.embed_documents(batch)
                 all_vectors.extend(vectors)
@@ -151,11 +153,11 @@ class RAGEngine:
             
             # Guardar en disco específico del proveedor
             self.vector_store.save_local(FAISS_PATH)
-            print(f"💾 Índice guardado en: {FAISS_PATH}")
+            logger.info(f"💾 Índice guardado en: {FAISS_PATH}")
 
         except Exception as e:
-            print(f"❌ Error generando embeddings con {EMBEDDING_PROVIDER}: {e}")
-            print("⚠️ Usando MOCK temporalmente para no detener el sistema.")
+            logger.info(f"❌ Error generando embeddings con {EMBEDDING_PROVIDER}: {e}")
+            logger.info("⚠️ Usando MOCK temporalmente para no detener el sistema.")
             self.vector_store = FAISS.from_documents(docs, MockEmbeddings())
 
     def query(self, query_text: str):
@@ -163,7 +165,7 @@ class RAGEngine:
             try:
                 return self.retriever.invoke(query_text)
             except Exception as e:
-                print(f"Error querying RAG: {e}")
+                logger.info(f"Error querying RAG: {e}")
                 return []
         return []
 

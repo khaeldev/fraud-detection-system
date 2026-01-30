@@ -6,9 +6,10 @@ import json
 import os
 import boto3
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
-
+logger = logging.getLogger(__name__)
 # ==========================================
 # 🎛️ SELECTOR DE PROVEEDOR
 # ==========================================
@@ -33,7 +34,7 @@ try:
             aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
             aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
-            region_name="us-east-1"
+            region_name=os.getenv("AWS_DEFAULT_REGION", "us-east-1")
         )
         # Usamos Haiku o Sonnet
         llm = ChatBedrock(
@@ -41,26 +42,26 @@ try:
             model="anthropic.claude-3-haiku-20240307-v1:0",
             temperature=0.1
         )
-        print("✅ Usando AWS Bedrock (Claude 3)")
+        logger.info("✅ Usando AWS Bedrock (Claude 3)")
 
     elif LLM_PROVIDER == "openai":
         from langchain_openai import ChatOpenAI
         # gpt-4o-mini es barato, rápido e inteligente
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
-        print("✅ Usando OpenAI (GPT-4o-mini)")
+        logger.info("✅ Usando OpenAI (GPT-4o-mini)")
 
     elif LLM_PROVIDER == "groq":
         # from langchain_groq import ChatGroq
         # # Llama 3 70B es increíblemente rápido en Groq
         # llm = ChatGroq(model_name="llama3-70b-8192", temperature=0.0)
-        # print("✅ Usando Groq (Llama 3)")
+        # logger.info("✅ Usando Groq (Llama 3)")
         pass
 
     else:
         raise Exception("Modo Mock seleccionado")
 
 except Exception as e:
-    print(f"⚠️ Error cargando {LLM_PROVIDER}: {e}. Cambiando a MOCK.")
+    logger.info(f"⚠️ Error cargando {LLM_PROVIDER}: {e}. Cambiando a MOCK.")
     llm = None # Esto activará el fallback manual más abajo
 
 # ==========================================
@@ -80,7 +81,7 @@ def invoke_agent(system_prompt: str, user_prompt: str, mock_data: dict | str, fo
         ]
         
         response = llm.invoke(messages)
-        print(f"💬 Respuesta LLM: {response}")
+        logger.info(f"💬 Respuesta LLM: {response}")
         content = response.content.strip() # type: ignore
 
         if force_json:
@@ -93,7 +94,7 @@ def invoke_agent(system_prompt: str, user_prompt: str, mock_data: dict | str, fo
         return content
 
     except Exception as e:
-        print(f"❌ Error en llamada LLM: {e}")
+        logger.info(f"❌ Error en llamada LLM: {e}")
         return mock_data
 
 # ==========================================
@@ -125,14 +126,14 @@ def transaction_context_agent(state: AgentState):
     }
     return {"internal_signals": signals}
 
-def behavior_agent(state: AgentState):
+def behavioral_pattern_agent(state: AgentState):
     sys = "Eres un Analista de Fraude. Detecta anomalías en monto, hora y dispositivo."
     usr = f"Tx: {state['transaction']}. Perfil: {state['customer_profile']}. ¿Es anómalo?"
     mock = "Monto muy superior al promedio y dispositivo nuevo. Riesgo Alto."
     
     return {"behavior_analysis": invoke_agent(sys, usr, mock)}
 
-def rag_agent(state: AgentState):
+def internal_policy_rag_agent(state: AgentState):
     try:
         query = f"Fraude transacción monto {state['transaction']['amount']}"
         docs = rag_engine.query(query)
@@ -142,7 +143,7 @@ def rag_agent(state: AgentState):
         policies = ["RAG no disponible."]
     return {"policy_context": policies}
 
-def threat_intel_agent(state: AgentState):
+def external_threat_intel_agent(state: AgentState):
     merchant = state["transaction"].get("merchant_id", "")
     if merchant == "M-002":
         intel = "ALERTA: Reportes de fraude recientes en este comercio."
@@ -150,7 +151,7 @@ def threat_intel_agent(state: AgentState):
         intel = "Sin reportes negativos."
     return {"external_intel": intel}
 
-def aggregator_agent(state: AgentState):
+def evidence_aggregator_agent(state: AgentState):
     return {}
 
 def debate_agent(state: AgentState):
@@ -160,7 +161,7 @@ def debate_agent(state: AgentState):
     
     return {"debate_transcript": invoke_agent(sys, usr, mock)}
 
-def arbiter_agent(state: AgentState):
+def decision_arbiter_agent(state: AgentState):
     sys = """Decide: APPROVE, CHALLENGE, BLOCK, ESCALATE_TO_HUMAN.
     Responde SOLO JSON: {"decision": "str", "confidence": float, "reason": "str"}"""
     usr = f"Debate: {state['debate_transcript']}"
@@ -181,24 +182,24 @@ def explainability_agent(state: AgentState):
 # ==========================================
 workflow = StateGraph(AgentState)
 workflow.add_node("transaction_context_agent", transaction_context_agent)
-workflow.add_node("behavior", behavior_agent)
-workflow.add_node("rag", rag_agent)
-workflow.add_node("threat_intel", threat_intel_agent)
-workflow.add_node("aggregator", aggregator_agent)
-workflow.add_node("debate", debate_agent)
-workflow.add_node("arbiter", arbiter_agent)
-workflow.add_node("explainer", explainability_agent)
+workflow.add_node("behavioral_pattern_agent", behavioral_pattern_agent)
+workflow.add_node("internal_policy_rag_agent", internal_policy_rag_agent)
+workflow.add_node("external_threat_intel_agent", external_threat_intel_agent)
+workflow.add_node("evidence_aggregator_agent", evidence_aggregator_agent)
+workflow.add_node("debate_agent", debate_agent)
+workflow.add_node("decision_arbiter_agent", decision_arbiter_agent)
+workflow.add_node("explainability_agent", explainability_agent)
 
 workflow.set_entry_point("transaction_context_agent")
-workflow.add_edge("transaction_context_agent", "behavior")
-workflow.add_edge("transaction_context_agent", "rag")
-workflow.add_edge("transaction_context_agent", "threat_intel")
-workflow.add_edge("behavior", "aggregator")
-workflow.add_edge("rag", "aggregator")
-workflow.add_edge("threat_intel", "aggregator")
-workflow.add_edge("aggregator", "debate")
-workflow.add_edge("debate", "arbiter")
-workflow.add_edge("arbiter", "explainer")
-workflow.add_edge("explainer", END)
+workflow.add_edge("transaction_context_agent", "behavioral_pattern_agent")
+workflow.add_edge("transaction_context_agent", "internal_policy_rag_agent")
+workflow.add_edge("transaction_context_agent", "external_threat_intel_agent")
+workflow.add_edge("behavioral_pattern_agent", "evidence_aggregator_agent")
+workflow.add_edge("internal_policy_rag_agent", "evidence_aggregator_agent")
+workflow.add_edge("external_threat_intel_agent", "evidence_aggregator_agent")
+workflow.add_edge("evidence_aggregator_agent", "debate_agent")
+workflow.add_edge("debate_agent", "decision_arbiter_agent")
+workflow.add_edge("decision_arbiter_agent", "explainability_agent")
+workflow.add_edge("explainability_agent", END)
 
 app_graph = workflow.compile()

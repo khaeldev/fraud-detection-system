@@ -3,6 +3,10 @@ from pydantic import BaseModel
 from .agents import app_graph, AgentState
 from .data import get_customer_profile, TRANSACTIONS
 from fastapi.middleware.cors import CORSMiddleware
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 app = FastAPI(title="AI Fraud Detection System")
 
@@ -44,7 +48,7 @@ async def analyze_transaction(tx: TransactionRequest):
         "explanation": {}
     }
     
-    print("🚀 Iniciando análisis de transacción...")
+    logger.info("🚀 Iniciando análisis de transacción...")
     result = app_graph.invoke(initial_state)
     
     response = {

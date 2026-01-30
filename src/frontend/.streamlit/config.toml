@@ -5,7 +5,7 @@ headless = true
 runOnSave = false
 enableCORS = false
 enableXsrfProtection = false
-enableWebsocketCompression = false
+enableWebsocketCompression = true
 
 [browser]
 serverAddress = "0.0.0.0"
