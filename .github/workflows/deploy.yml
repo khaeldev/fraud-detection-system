@@ -62,5 +62,10 @@ jobs:
           docker push $ECR_REGISTRY/$REPO_NAME:latest
 
       - name: Terraform Apply (Full Infra)
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -input=false
         working-directory: ${{ env.TF_WORKING_DIR }}
+        env:
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_langsmith_api_key: ${{ secrets.LANGSMITH_API_KEY }}
+          TF_VAR_langsmith_project: ${{ secrets.LANGSMITH_PROJECT }}
+          TF_VAR_langchain_tracing_v2: ${{ secrets.LANGCHAIN_TRACING_V2 }}
