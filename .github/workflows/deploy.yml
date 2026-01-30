@@ -37,7 +37,7 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
 
       - name: Terraform Apply (ECR Only)
-        run: terraform apply -auto-approve -target=aws_ecr_repository.repo
+        run: terraform apply -auto-approve -input=false -target=aws_ecr_repository.repo
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
           TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}

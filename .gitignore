@@ -12,3 +12,10 @@ wheels/
 
 .langgraph_api
 faiss_store*/
+
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
