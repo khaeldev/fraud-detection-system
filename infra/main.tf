@@ -97,7 +97,7 @@ resource "aws_apprunner_service" "frontend" {
       image_repository_type = "ECR"
 
       image_configuration {
-        port = "8501"
+        port = "8080"
 
         runtime_environment_variables = {
           ENVIRONMENT       = "production"

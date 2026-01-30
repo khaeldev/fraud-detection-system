@@ -9,7 +9,6 @@ load_dotenv()
 
 st.set_page_config(page_title="Sistema IA Detección de Fraude", layout="wide")
 
-# CORREGIR: puerto 8000 para el backend, no 8501
 API_URL = os.getenv("BACKEND_BASE_URL", "http://localhost:8000")
 
 st.title("🛡️ Sistema Multi-Agente: Detección de Fraude Ambiguo")
