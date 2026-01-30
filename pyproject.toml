@@ -20,3 +20,7 @@ dependencies = [
     "streamlit>=1.53.1",
     "uvicorn>=0.40.0",
 ]
+authors = [
+    { name = "Kenny Luque", email = "kenny.luque.t.2397@gmail.com" }
+]
+license = { text = "Apache-2.0" }

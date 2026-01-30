@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # 🎛️ SELECTOR DE PROVEEDOR
 # ==========================================
 # Opciones: "aws", "openai", "groq", "mock"
-LLM_PROVIDER = "openai" 
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")
 
 # ==========================================
 # 🔌 INICIALIZACIÓN DEL MODELO

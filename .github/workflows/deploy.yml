@@ -12,7 +12,6 @@ env:
   AWS_REGION: us-east-1
   TF_WORKING_DIR: './infra'
   ECR_REPO_NAME: 'fraud-detection-system'
-  ECR_FRONTEND_REPO_NAME: 'fraud-detection-frontend'
 
 jobs:
   terraform-ecr:
@@ -38,9 +37,11 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
 
       - name: Terraform Apply (ECR Only)
-        run: terraform apply -auto-approve -input=false -target=aws_ecr_repository.repo -target=aws_ecr_repository.frontend_repo
+        run: terraform apply -auto-approve -input=false -target=aws_ecr_repository.repo
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
+          TF_VAR_embedding_provider: ${{ secrets.EMBEDDING_PROVIDER }}
+          TF_VAR_llm_provider: ${{ secrets.LLM_PROVIDER }}
           TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
           TF_VAR_langsmith_api_key: ${{ secrets.LANGSMITH_API_KEY }}
           TF_VAR_langsmith_project: ${{ secrets.LANGSMITH_PROJECT }}
@@ -80,44 +81,10 @@ jobs:
           echo "Subiendo imagen backend..."
           docker push $ECR_REGISTRY/$REPO_NAME:latest
 
-  build-frontend:
-    name: "🎨 Build Frontend Image"
-    runs-on: ubuntu-latest
-    needs: terraform-ecr
-    
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: true
-
-      - name: Build & Push Frontend
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          REPO_NAME=${{ env.ECR_FRONTEND_REPO_NAME }}
-
-          echo "Construyendo imagen frontend..."
-          docker build -t $ECR_REGISTRY/$REPO_NAME:latest -f src/frontend/Dockerfile .
-
-          echo "Subiendo imagen frontend..."
-          docker push $ECR_REGISTRY/$REPO_NAME:latest
-
   deploy-infrastructure:
     name: "🚀 Deploy Full Infrastructure"
     runs-on: ubuntu-latest
-    needs: [build-backend, build-frontend]
+    needs: [build-backend]
     
     steps:
       - name: Checkout Code
@@ -191,16 +158,10 @@ jobs:
           check_service_status "fraud-detection-system-service-v1"
           BACKEND_STATUS=$?
           
-          # Verificar frontend
-          echo ""
-          echo "=== Frontend Service ==="
-          check_service_status "fraud-detection-frontend-v1"
-          FRONTEND_STATUS=$?
-          
           # Verificar si ambos están listos
-          if [ $BACKEND_STATUS -eq 0 ] && [ $FRONTEND_STATUS -eq 0 ]; then
+          if [ $BACKEND_STATUS -eq 0 ]; then
             echo ""
-            echo "✅ Todos los servicios están listos para actualizar"
+            echo "✅ Backend está listo para actualizar"
             exit 0
           else
             echo ""
@@ -240,7 +201,4 @@ jobs:
           cd ${{ env.TF_WORKING_DIR }}
           echo "📍 Backend URL:"
           terraform output -raw app_url
-          echo ""
-          echo "📍 Frontend URL:"
-          terraform output -raw frontend_url
           echo ""

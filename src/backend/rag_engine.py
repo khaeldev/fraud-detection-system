@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # 🎛️ SELECTOR DE PROVEEDOR (SWITCH)
 # ==========================================
 # Opciones disponibles: "aws", "openai", "azure", "mock"
-EMBEDDING_PROVIDER = "openai" 
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "openai")
 
 BATCH_SIZE = 10
 BATCH_SLEEP = 1.0 

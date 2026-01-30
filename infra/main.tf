@@ -11,6 +11,14 @@ terraform {
 
 provider "aws" { region = "us-east-1" }
 
+variable "embedding_provider" {
+  type      = string
+  sensitive = true
+}
+variable "llm_provider" {
+  type      = string
+  sensitive = true
+}
 variable "openai_api_key" {
   type      = string
   sensitive = true
@@ -65,7 +73,9 @@ resource "aws_apprunner_service" "app" {
         port = "8000"
         runtime_environment_variables = {
           ENVIRONMENT = "production"
-          OPENAI_API_KEY    = var.openai_api_key
+          EMBEDDING_PROVIDER   = var.embedding_provider
+          LLM_PROVIDER         = var.llm_provider
+          OPENAI_API_KEY       = var.openai_api_key
           LANGSMITH_PROJECT    = var.langsmith_project
           LANGSMITH_API_KEY    = var.langsmith_api_key
           LANGCHAIN_TRACING_V2 = var.langchain_tracing_v2
@@ -76,63 +86,5 @@ resource "aws_apprunner_service" "app" {
   depends_on = [aws_ecr_repository.repo]
 }
 
-# 4. ECR para Frontend
-resource "aws_ecr_repository" "frontend_repo" {
-  name         = "fraud-detection-frontend"
-  force_delete = true
-}
-
-resource "aws_apprunner_service" "frontend" {
-  service_name = "fraud-detection-frontend-v1"
-
-  source_configuration {
-    authentication_configuration {
-      access_role_arn = aws_iam_role.app_runner_role.arn
-    }
-
-    auto_deployments_enabled = false
-
-    image_repository {
-      image_identifier      = "${aws_ecr_repository.frontend_repo.repository_url}:latest"
-      image_repository_type = "ECR"
-
-      image_configuration {
-        port = "8080"
-
-        runtime_environment_variables = {
-          ENVIRONMENT       = "production"
-          BACKEND_BASE_URL  = "https://${aws_apprunner_service.app.service_url}"
-          STREAMLIT_SERVER_ENABLE_WEBSOCKET_COMPRESSION = "false"
-          STREAMLIT_SERVER_MAX_MESSAGE_SIZE = "200"
-        }
-      }
-    }
-  }
-
-  network_configuration {
-    ingress_configuration {
-      is_publicly_accessible = true
-    }
-  }
-
-  health_check_configuration {
-    protocol = "HTTP"
-    path     = "/_stcore/health"
-    interval            = 10
-    timeout             = 5
-    healthy_threshold   = 1
-    unhealthy_threshold = 5
-  }
-
-  depends_on = [
-    aws_ecr_repository.frontend_repo,
-    aws_apprunner_service.app
-  ]
-}
-
-
 output "ecr_url" { value = aws_ecr_repository.repo.repository_url }
 output "app_url" { value = aws_apprunner_service.app.service_url }
-output "frontend_url" {
-  value = aws_apprunner_service.frontend.service_url
-}
