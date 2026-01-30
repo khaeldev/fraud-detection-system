@@ -20,7 +20,7 @@ EMBEDDING_PROVIDER = "openai"
 BATCH_SIZE = 10
 BATCH_SLEEP = 1.0 
 
-FAISS_PATH = f"faiss_store_{EMBEDDING_PROVIDER}"
+FAISS_PATH = f"tmp/faiss_store_{EMBEDDING_PROVIDER}"
 
 # ==========================================
 # 1. CLASE MOCK (Fallback de seguridad)

@@ -12,6 +12,7 @@ wheels/
 
 .langgraph_api
 faiss_store*/
+tmp/*
 
 .terraform/
 *.tfstate

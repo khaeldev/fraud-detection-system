@@ -101,7 +101,7 @@ resource "aws_apprunner_service" "frontend" {
 
         runtime_environment_variables = {
           ENVIRONMENT       = "production"
-          BACKEND_BASE_URL  = aws_apprunner_service.app.service_url
+          BACKEND_BASE_URL  = "https://${aws_apprunner_service.app.service_url}"
         }
       }
     }
