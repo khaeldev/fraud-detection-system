@@ -102,9 +102,27 @@ resource "aws_apprunner_service" "frontend" {
         runtime_environment_variables = {
           ENVIRONMENT       = "production"
           BACKEND_BASE_URL  = "https://${aws_apprunner_service.app.service_url}"
+          STREAMLIT_SERVER_PORT                 = "8501"
+          STREAMLIT_SERVER_ADDRESS              = "0.0.0.0"
+          STREAMLIT_SERVER_HEADLESS             = "true"
+          STREAMLIT_SERVER_ENABLE_CORS          = "false"
+          STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION = "false"
+          STREAMLIT_BROWSER_GATHER_USAGE_STATS  = "false"
+          STREAMLIT_SERVER_ENABLE_WEBSOCKET_COMPRESSION = "false"
         }
       }
     }
+  }
+
+  network_configuration {
+    ingress_configuration {
+      is_publicly_accessible = true
+    }
+  }
+
+  health_check_configuration {
+    protocol = "HTTP"
+    path     = "/_stcore/health"
   }
 
   depends_on = [

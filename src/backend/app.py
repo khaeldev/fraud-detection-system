@@ -2,8 +2,18 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from .agents import app_graph, AgentState
 from .data import get_customer_profile, TRANSACTIONS
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="AI Fraud Detection System")
+
+# Configuración de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permite todos los orígenes
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class TransactionRequest(BaseModel):
     transaction_id: str
