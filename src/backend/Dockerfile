@@ -64,4 +64,4 @@ USER appuser
 EXPOSE 8000
 
 # Tu comando de arranque
-CMD ["uvicorn", "src.backend.app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--log-config", "src.backend.logging.yaml"]
+CMD ["uvicorn", "src.backend.app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--log-config", "src/backend/logging.yaml"]

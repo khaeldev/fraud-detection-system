@@ -147,6 +147,13 @@ def external_threat_intel_agent(state: AgentState):
     merchant = state["transaction"].get("merchant_id", "")
     if merchant == "M-002":
         intel = "ALERTA: Reportes de fraude recientes en este comercio."
+    
+    elif merchant == "M-DANGER":
+        intel = "ALERTA CRÍTICA (NIVEL ROJO): Este comercio está en la lista negra global de lavado de activos. BLOQUEO OBLIGATORIO."
+    
+    elif merchant == "M-SAFE":
+        intel = "Comercio verificado y seguro (Whitelisted)."
+
     else:
         intel = "Sin reportes negativos."
     return {"external_intel": intel}
@@ -163,6 +170,10 @@ def debate_agent(state: AgentState):
 
 def decision_arbiter_agent(state: AgentState):
     sys = """Decide: APPROVE, CHALLENGE, BLOCK, ESCALATE_TO_HUMAN.
+    REGLAS DE ORO:
+    1. Si la Intel Externa dice "BLOQUEO OBLIGATORIO" o "Lista Negra" -> TU DECISIÓN DEBE SER "BLOCK".
+    2. Si el comportamiento es normal y el comercio es seguro -> TU DECISIÓN DEBE SER "APPROVE".
+    3. Para dudas -> "CHALLENGE" o "ESCALATE_TO_HUMAN".
     Responde SOLO JSON: {"decision": "str", "confidence": float, "reason": "str"}"""
     usr = f"Debate: {state['debate_transcript']}"
     mock = {"decision": "CHALLENGE", "confidence": 0.9, "reason": "Intel de fraude confirmada."}
