@@ -2,10 +2,14 @@ import streamlit as st
 import requests
 import json
 import pandas as pd
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 
 st.set_page_config(page_title="Sistema IA Detección de Fraude", layout="wide")
 
-API_URL = "http://localhost:8000"
+API_URL = os.getenv("BACKEND_BASE_URL", "http://localhost:8501")
 
 st.title("🛡️ Sistema Multi-Agente: Detección de Fraude Ambiguo")
 

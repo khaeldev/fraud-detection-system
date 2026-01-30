@@ -55,10 +55,17 @@ jobs:
         run: |
           REPO_NAME=${{ env.ECR_REPO_NAME }}
           
-          echo "Construyendo imagen..."
-          docker build -t $ECR_REGISTRY/$REPO_NAME:latest .
+          echo "Construyendo imagen backend..."
+          docker build -t $ECR_REGISTRY/$REPO_NAME:latest -f src/backend/Dockerfile .
           
-          echo "Subiendo imagen..."
+          echo "Subiendo imagen backend..."
+          docker push $ECR_REGISTRY/$REPO_NAME:latest
+      
+      - name: Build & Push Frontend
+        run: |
+          echo "Construyendo imagen frontend..."
+          docker build -t $ECR_REGISTRY/$REPO_NAME:latest -f src/frontend/Dockerfile .
+          echo "Subiendo imagen frontend..."
           docker push $ECR_REGISTRY/$REPO_NAME:latest
 
       - name: Terraform Apply (Full Infra)

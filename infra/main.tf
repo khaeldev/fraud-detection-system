@@ -76,5 +76,46 @@ resource "aws_apprunner_service" "app" {
   depends_on = [aws_ecr_repository.repo]
 }
 
+# 4. ECR para Frontend
+resource "aws_ecr_repository" "frontend_repo" {
+  name         = "fraud-detection-frontend"
+  force_delete = true
+}
+
+resource "aws_apprunner_service" "frontend" {
+  service_name = "fraud-detection-frontend-v1"
+
+  source_configuration {
+    authentication_configuration {
+      access_role_arn = aws_iam_role.app_runner_role.arn
+    }
+
+    auto_deployments_enabled = true
+
+    image_repository {
+      image_identifier      = "${aws_ecr_repository.frontend_repo.repository_url}:latest"
+      image_repository_type = "ECR"
+
+      image_configuration {
+        port = "8501"
+
+        runtime_environment_variables = {
+          ENVIRONMENT       = "production"
+          BACKEND_BASE_URL  = aws_apprunner_service.app.service_url
+        }
+      }
+    }
+  }
+
+  depends_on = [
+    aws_ecr_repository.frontend_repo,
+    aws_apprunner_service.app
+  ]
+}
+
+
 output "ecr_url" { value = aws_ecr_repository.repo.repository_url }
 output "app_url" { value = aws_apprunner_service.app.service_url }
+output "frontend_url" {
+  value = aws_apprunner_service.frontend.service_url
+}
