@@ -38,7 +38,7 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
 
       - name: Terraform Apply (ECR Only)
-        run: terraform apply -auto-approve -input=false -target=aws_ecr_repository.repo
+        run: terraform apply -auto-approve -input=false -target=aws_ecr_repository.repo -target=aws_ecr_repository.frontend_repo
         working-directory: ${{ env.TF_WORKING_DIR }}
         env:
           TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
@@ -70,7 +70,7 @@ jobs:
 
           echo "Construyendo imagen frontend..."
           docker build -t $ECR_REGISTRY/$REPO_NAME:latest -f src/frontend/Dockerfile .
-          
+
           echo "Subiendo imagen frontend..."
           docker push $ECR_REGISTRY/$REPO_NAME:latest
 
