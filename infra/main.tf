@@ -56,7 +56,7 @@ resource "aws_apprunner_service" "app" {
   source_configuration {
     authentication_configuration { access_role_arn = aws_iam_role.app_runner_role.arn }
     
-    auto_deployments_enabled = true 
+    auto_deployments_enabled = false 
 
     image_repository {
       image_identifier      = "${aws_ecr_repository.repo.repository_url}:latest"
@@ -90,7 +90,7 @@ resource "aws_apprunner_service" "frontend" {
       access_role_arn = aws_iam_role.app_runner_role.arn
     }
 
-    auto_deployments_enabled = true
+    auto_deployments_enabled = false
 
     image_repository {
       image_identifier      = "${aws_ecr_repository.frontend_repo.repository_url}:latest"
