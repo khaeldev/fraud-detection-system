@@ -283,6 +283,7 @@ terraform destroy
 
 ## Frontend
 
+Si no encuentras el servicio disponible, es porque fue dado de baja debido a costos operativos.
 https://frauddetectionapp1.streamlit.app/
 
 ## 🧠 Decisiones de Diseño
