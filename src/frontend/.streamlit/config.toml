@@ -2,14 +2,16 @@
 port = 8501
 address = "0.0.0.0"
 headless = true
+runOnSave = false
 enableCORS = false
 enableXsrfProtection = false
 enableWebsocketCompression = false
 
 [browser]
-gatherUsageStats = false
 serverAddress = "0.0.0.0"
+gatherUsageStats = false
 serverPort = 8501
 
-[logger]
-level = "info"
+[client]
+showErrorDetails = "full"
+toolbarMode = "minimal"

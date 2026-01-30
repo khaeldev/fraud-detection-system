@@ -102,6 +102,8 @@ resource "aws_apprunner_service" "frontend" {
         runtime_environment_variables = {
           ENVIRONMENT       = "production"
           BACKEND_BASE_URL  = "https://${aws_apprunner_service.app.service_url}"
+          STREAMLIT_SERVER_ENABLE_WEBSOCKET_COMPRESSION = "false"
+          STREAMLIT_SERVER_MAX_MESSAGE_SIZE = "200"
         }
       }
     }
@@ -116,6 +118,10 @@ resource "aws_apprunner_service" "frontend" {
   health_check_configuration {
     protocol = "HTTP"
     path     = "/_stcore/health"
+    interval            = 10
+    timeout             = 5
+    healthy_threshold   = 1
+    unhealthy_threshold = 5
   }
 
   depends_on = [
