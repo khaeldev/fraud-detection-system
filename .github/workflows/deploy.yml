@@ -12,6 +12,7 @@ env:
   AWS_REGION: us-east-1
   TF_WORKING_DIR: './infra'
   ECR_REPO_NAME: 'fraud-detection-system'
+  ECR_FRONTEND_REPO_NAME: 'fraud-detection-frontend'
 
 jobs:
   deploy-process:
@@ -62,9 +63,14 @@ jobs:
           docker push $ECR_REGISTRY/$REPO_NAME:latest
       
       - name: Build & Push Frontend
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
+          REPO_NAME=${{ env.ECR_FRONTEND_REPO_NAME }}
+
           echo "Construyendo imagen frontend..."
           docker build -t $ECR_REGISTRY/$REPO_NAME:latest -f src/frontend/Dockerfile .
+          
           echo "Subiendo imagen frontend..."
           docker push $ECR_REGISTRY/$REPO_NAME:latest
 
