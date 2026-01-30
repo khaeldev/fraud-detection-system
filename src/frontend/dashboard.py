@@ -83,6 +83,6 @@ try:
                 st.error(f"Error en el análisis: {e}")
 
 except Exception as e:
-    st.error(f"No se pudo conectar al backend: {API_URL}")
+    st.error(f"Servicio no disponible, dado de baja debido a costos operativos.")
     st.error(f"Error: {e}")
     st.info("Verifica que el backend esté corriendo y la URL sea correcta.")
