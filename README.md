@@ -22,6 +22,7 @@ Sistema avanzado de **detección de fraude financiero** basado en una **arquitec
 * [Estructura del Proyecto](#-estructura-del-proyecto)
 * [Instalación y Configuración](#-instalación-y-configuración)
 * [Uso y Ejecución](#️-uso-y-ejecución)
+* [Capturas de Pantalla](#-capturas-de-pantalla)
 * [Observabilidad (LangSmith)](#-observabilidad-langsmith)
 * [Despliegue (Docker & Cloud)](#-despliegue-docker--cloud)
 * [Decisiones de Diseño](#-decisiones-de-diseño)
@@ -191,6 +192,24 @@ uv run streamlit run src/frontend/dashboard.py
 ```
 
 * Dashboard: [http://localhost:8501](http://localhost:8501)
+
+---
+
+## 🖼 Capturas de Pantalla
+
+Algunas vistas de la aplicación y del flujo operativo:
+
+### Vista 1
+
+![Captura principal del sistema](<static/Screenshot 2026-03-17 at 9.52.02 PM.png>)
+
+### Vista 2
+
+![Captura complementaria del sistema](<static/Screenshot 2026-03-17 at 9.58.17 PM.png>)
+
+### Vista 3
+
+![Captura adicional del sistema](<static/Screenshot 2026-03-17 at 9.58.47 PM.png>)
 
 ---
 
@@ -391,7 +410,7 @@ Este proyecto se distribuye bajo la licencia **Apache 2.0**.
 ---
 ## Aviso sobre la licencia
 
-Este repositorio se proporciona únicamente con fines de evaluación técnica.
+
 La implementación tiene un alcance y una simplicidad intencionados.
 
 Cualquier uso que vaya más allá de la evaluación requiere el permiso explícito por escrito del autor.
